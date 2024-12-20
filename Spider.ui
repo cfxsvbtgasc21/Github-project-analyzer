@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>743</width>
-    <height>829</height>
+    <width>901</width>
+    <height>904</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -40,15 +40,6 @@
        <number>1</number>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
-       <property name="spacing">
-        <number>20</number>
-       </property>
-       <property name="sizeConstraint">
-        <enum>QLayout::SetDefaultConstraint</enum>
-       </property>
-       <property name="rightMargin">
-        <number>13</number>
-       </property>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
          <property name="spacing">
@@ -87,6 +78,23 @@
             <string>浏览</string>
            </property>
           </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <property name="spacing">
+          <number>40</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="label_6">
+           <property name="text">
+            <string>Cookie设置</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="Cookie"/>
          </item>
         </layout>
        </item>
@@ -224,18 +232,18 @@
    <zorder>label</zorder>
    <zorder>back</zorder>
    <zorder>label_4</zorder>
-   <zorder>label_5</zorder>
-   <zorder>listWidget_2</zorder>
    <zorder>frame</zorder>
    <zorder>progressBar</zorder>
    <zorder>listWidget</zorder>
+   <zorder>listWidget_2</zorder>
+   <zorder>label_5</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>743</width>
+     <width>901</width>
      <height>30</height>
     </rect>
    </property>
