@@ -1,6 +1,6 @@
 import sys
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
-                            QHBoxLayout, QLineEdit, QPushButton, QLabel)
+                             QHBoxLayout, QLineEdit, QPushButton, QLabel, QScrollArea)
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from crawler import GitHubCrawler
 
@@ -51,10 +51,16 @@ class MainWindow(QMainWindow):
         # 创建结果显示区域
         self.result_label = QLabel('在此显示分析结果')
         self.result_label.setAlignment(Qt.AlignCenter)
+
+        # 创建一个 QScrollArea 来显示分析结果
+        self.scroll_area = QScrollArea()
+        self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.setWidget(self.result_label)
         
         # 添加到主布局
         layout.addLayout(input_layout)
-        layout.addWidget(self.result_label)
+        #layout.addWidget(self.result_label)
+        layout.addWidget(self.scroll_area)
         
     def start_analysis(self):
         # 获取用户输入的GitHub仓库URL
@@ -75,12 +81,22 @@ class MainWindow(QMainWindow):
         
     def show_results(self, repo):
         self.analyze_btn.setEnabled(True)       #启用分析按钮
+        # 显示仓库的基本信息
         result_text = f"""
-        仓库名称: {repo.name}
-        作者: {repo.owner}
-        Star数: {repo.stars}
-        Fork数: {repo.forks}
-        """
+                <b>仓库名称:</b> {repo.name}<br>
+                <b>作者:</b> {repo.owner}<br>
+                <b>Star数:</b> {repo.stars}<br>
+                <b>Fork数:</b> {repo.forks}<br>
+                <b>提交记录:</b><br>
+                """
+        if repo.commits:
+            result_text += "<ul>"
+            for commit in repo.commits:
+                commit_info = f"<li><b>提交哈希:</b> {commit.sha[:7]} <b>作者:</b> {commit.author} <b>时间:</b> {commit.date.strftime('%Y-%m-%d %H:%M:%S')} <b>消息:</b> {commit.message}</li>"
+                result_text += commit_info
+            result_text += "</ul>"
+        else:
+            result_text += "<i>没有找到提交记录.</i>"
         print(result_text)
         self.result_label.setText(result_text)
         

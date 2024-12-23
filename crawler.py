@@ -55,7 +55,7 @@ class GitHubCrawler:
                 file.write(response.text)
 
             print(f"HTML内容已保存到 {file_path}")
-            print(response.text)
+            #print(response.text)
             try:
                 # 获取仓库名称
                 full_name = soup.select_one('strong[itemprop="name"] a').text.strip()
@@ -106,15 +106,58 @@ class GitHubCrawler:
                 print(f"解析错误: {str(e)}")
                 stars = 0
                 forks = 0
-            
+
+            commits = self.get_commits(repo_url)
+
             return Repository(
                 name=name,
                 owner=owner,
                 stars=stars,
                 forks=forks,
-                commits=[],
+                commits=[commits],
                 contributors=[]
             )
             
         except Exception as e:
             raise Exception(f"获取仓库信息失败: {str(e)}")
+
+    def get_commits(self, repo_url: str):
+        """获取项目提交记录"""
+        commits = []
+        try:
+            repo_url_new = repo_url.replace('.git', '')
+            commit_url = f"{repo_url_new}/commits/main"
+            print(commit_url)
+            response = self.session.get(commit_url, headers=self.headers)
+            if response.status_code != 200:
+                raise Exception(f"获取提交记录失败，HTTP错误: {response.status_code}")
+
+            soup = BeautifulSoup(response.text, 'html.parser')
+
+            commit_elements = soup.select('li.commit')
+            for commit_element in commit_elements:
+                try:
+                    # 提取每个提交的必要信息
+                    commit_hash = commit_element.select_one('a.sha')['href'].split('/')[-1]
+                    commit_message = commit_element.select_one('p.commit-title').text.strip()
+                    commit_date = commit_element.select_one('relative-time')['datetime']
+                    commit_author = commit_element.select_one('a.commit-author').text.strip()
+
+                    # 转换提交日期格式
+                    commit_date = datetime.fromisoformat(commit_date)
+
+                    # 创建 Commit 对象
+                    commit = Commit(
+                        commit_hash=commit_hash,
+                        message=commit_message,
+                        author=commit_author,
+                        date=commit_date
+                    )
+                    commits.append(commit)
+                except Exception as e:
+                    print(f"提取提交记录失败: {str(e)}")
+
+        except Exception as e:
+            print(f"获取提交记录失败: {str(e)}")
+
+        return commits
