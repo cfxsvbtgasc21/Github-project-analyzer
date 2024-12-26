@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>830</width>
-    <height>763</height>
+    <width>811</width>
+    <height>810</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -36,7 +36,7 @@
       </font>
      </property>
      <property name="text">
-      <string>可视化Python功能应用程序</string>
+      <string>Github项目分析器</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -72,7 +72,7 @@
       </spacer>
      </item>
      <item>
-      <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,0,0,0,0,0,0">
+      <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,0,0,0,0">
        <property name="spacing">
         <number>9</number>
        </property>
@@ -99,7 +99,7 @@
         </spacer>
        </item>
        <item>
-        <widget class="QPushButton" name="spider">
+        <widget class="QPushButton" name="spider_issue">
          <property name="sizePolicy">
           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -113,7 +113,7 @@
           </size>
          </property>
          <property name="text">
-          <string>进入爬虫</string>
+          <string>issues分析</string>
          </property>
         </widget>
        </item>
@@ -131,29 +131,9 @@
         </spacer>
        </item>
        <item>
-        <widget class="QPushButton" name="node">
+        <widget class="QPushButton" name="spider_commit">
          <property name="text">
-          <string>图节点生成</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer_2">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QPushButton" name="z3">
-         <property name="text">
-          <string>数学问题解决</string>
+          <string>commits分析</string>
          </property>
         </widget>
        </item>

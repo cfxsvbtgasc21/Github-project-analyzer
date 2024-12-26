@@ -6,25 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>901</width>
-    <height>904</height>
+    <width>850</width>
+    <height>981</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout_2">
-    <item>
-     <widget class="QLabel" name="label">
-      <property name="frameShape">
-       <enum>QFrame::NoFrame</enum>
-      </property>
-      <property name="text">
-       <string>爬虫参数设置</string>
-      </property>
-     </widget>
-    </item>
+   <layout class="QVBoxLayout" name="verticalLayout_3">
     <item>
      <widget class="QFrame" name="frame">
       <property name="layoutDirection">
@@ -41,6 +31,16 @@
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
+        <widget class="QLabel" name="label">
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="text">
+          <string>爬虫参数设置</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
          <property name="spacing">
           <number>90</number>
@@ -48,7 +48,7 @@
          <item>
           <widget class="QLabel" name="label_2">
            <property name="text">
-            <string>网址</string>
+            <string>Github项目主页网址</string>
            </property>
           </widget>
          </item>
@@ -97,6 +97,9 @@
           <widget class="QLineEdit" name="Cookie"/>
          </item>
         </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_5"/>
        </item>
       </layout>
      </widget>
@@ -195,55 +198,81 @@
      </layout>
     </item>
     <item>
-     <widget class="QLabel" name="label_4">
-      <property name="text">
-       <string>爬取进度</string>
+     <widget class="QFrame" name="frame_2">
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
       </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QProgressBar" name="progressBar">
-      <property name="value">
-       <number>24</number>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
       </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QListWidget" name="listWidget"/>
-    </item>
-    <item>
-     <widget class="QLabel" name="label_5">
-      <property name="text">
-       <string>结果提取</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QListWidget" name="listWidget_2"/>
-    </item>
-    <item>
-     <widget class="QPushButton" name="back">
-      <property name="text">
-       <string>返回</string>
-      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>爬取进度</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QProgressBar" name="progressBar">
+         <property name="value">
+          <number>24</number>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_5">
+         <property name="text">
+          <string>结果显示</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QListWidget" name="listWidget"/>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_6">
+         <item>
+          <widget class="QPushButton" name="pushButton_2">
+           <property name="text">
+            <string>生成词云</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton">
+           <property name="text">
+            <string>生成分析图</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_3">
+           <property name="text">
+            <string>统计</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="back">
+           <property name="text">
+            <string>返回主页面</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
      </widget>
     </item>
    </layout>
-   <zorder>label</zorder>
-   <zorder>back</zorder>
-   <zorder>label_4</zorder>
-   <zorder>frame</zorder>
-   <zorder>progressBar</zorder>
-   <zorder>listWidget</zorder>
-   <zorder>listWidget_2</zorder>
-   <zorder>label_5</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>901</width>
+     <width>850</width>
      <height>30</height>
     </rect>
    </property>

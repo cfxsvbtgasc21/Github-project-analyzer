@@ -1,48 +1,28 @@
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow,QFileDialog,QMessageBox
-
+from PyQt5.QtGui import QIntValidator
 import sys
 import Spider_events as SP
-from Spider import Ui_MainWindow
-class Spider_window(QMainWindow):
+from Spider_commit import Ui_MainWindow
+class Spider_commit_window(QMainWindow):
     def __init__(self):
         super().__init__()
         # self.spider_window = QMainWindow()
         self.ui_spider = Ui_MainWindow()  # 初始化为None
         self.ui_spider.setupUi(self)
-
         self.ui_spider.progressBar.setValue(0)
         self.ui_spider.stop.setEnabled(False)
+        max_value = 100
+
+        # 创建 QIntValidator，限制输入为大于0的整数且小于max_value
+        validator = QIntValidator(1, max_value, self.ui_spider.count)
+        self.ui_spider.count.setValidator(validator)
         # 连接信号
         self.ui_spider.back.clicked.connect(self.return_to_home)
         self.ui_spider.start.clicked.connect(self.show_results)
         self.ui_spider.stop.clicked.connect(self.stop_spi)
-        self.ui_spider.save_address.setReadOnly(True)
-        self.ui_spider.browse.clicked.connect(self.open_file_dialog)
-        self.ui_spider.introduction.triggered.connect(self.show_spider_help)
-        # self.spider_window.show()
-        # self.home_window.hide()
+        self.ui_spider.actiontoken.triggered.connect(self.show_spider_help)
     def show_results(self):
-        try:
-            url = self.ui_spider.address.text().strip()
-            if not url:
-                self.ui_spider.listWidget.addItem("请输入URL地址")
-                return
-            if not (url.startswith('http://') or url.startswith('https://')):
-                url = 'http://' + url
-            # 创建并启动爬虫线程
-            co = self.ui_spider.Cookie.text()
-            self.spider_thread = SP.SpiderThread(url, co)
-            self.ui_spider.stop.setEnabled(True)
-            self.spider_thread.progress_updated.connect(self.update_progress)
-            self.spider_thread.result_ready.connect(self.handle_results)
-            # 禁用开始按钮
-            self.ui_spider.start.setEnabled(False)
-            self.spider_thread.start()
-        except Exception as e:
-            self.ui_spider.listWidget.addItem(f"启动爬虫时出错：{str(e)}")
-            self.ui_spider.start.setEnabled(True)
-            self.ui_spider.stop.setEnabled(False)
-
+            self.ui_spider.progressBar.setValue(0)
     def handle_results(self, results):
         try:
             self.ui_spider.listWidget.clear()
@@ -82,7 +62,6 @@ class Spider_window(QMainWindow):
             from home_window import MainApp
             self.home_window = MainApp()
             self.home_window.show()
-
     def stop_spi(self):
         try:
             if hasattr(self, 'spider_thread'):
@@ -99,14 +78,3 @@ class Spider_window(QMainWindow):
                 self.ui_spider.listWidget.addItem("爬取已取消")
         except Exception as e:
             print(f"停止爬虫时出错：{str(e)}")
-
-    def open_file_dialog(self):
-        directory = QFileDialog.getExistingDirectory(
-            self,  # 使用spider_window作为父窗口
-            "选择目录",
-            "",
-            QFileDialog.ShowDirsOnly
-        )
-        if directory:  # 添加检查，确保用户选择了目录
-            self.ui_spider.save_address.setText(directory)
-
