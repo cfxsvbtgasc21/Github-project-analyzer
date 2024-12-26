@@ -1,5 +1,4 @@
 import json
-
 from PyQt5.QtCore import QThread, pyqtSignal
 from bs4 import BeautifulSoup
 import requests
@@ -244,7 +243,6 @@ def generate_time_seq():
     graphql_url = 'https://api.github.com/graphql'
     # 设置请求头，包括认证信息和内容类型
     headers = {
-        'Authorization': f'bearer {token}',
         'Content-Type': 'application/json'
     }
     first_count = 100
