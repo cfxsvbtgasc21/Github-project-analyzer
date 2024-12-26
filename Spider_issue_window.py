@@ -86,11 +86,11 @@ class Spider_issue_window(QMainWindow):
 
     def stop_spi(self):
         try:
-            if hasattr(self, 'spider_thread'):
+            if hasattr(self, 'spider_thread')and self.spider_thread.isRunning():
                 # 设置停止标志
                 self.spider_thread.is_running = False
                 # 等待线程结束
-                self.spider_thread.wait()
+                self.spider_thread.terminate()
                 # 重置进度条
                 self.ui_spider.progressBar.setValue(0)
                 # 重新启用开始按钮
