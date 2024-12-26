@@ -9,7 +9,6 @@ from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 import matplotlib
 from datetime import datetime
-token="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"
 # 设置全局字体
 matplotlib.rcParams['font.family'] = 'Microsoft YaHei'
 matplotlib.rcParams['axes.unicode_minus'] = False  # 正确显示负号
