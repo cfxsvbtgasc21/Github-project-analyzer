@@ -3,12 +3,10 @@ from home import Ui_home
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 import sys
-
 class MainApp(QWidget):
     def __init__(self):
         super().__init__()
         self.spider_window = None  # 初始化为None
-
         self.ui_home = Ui_home()
         self.ui_home.setupUi(self)
         self.show()

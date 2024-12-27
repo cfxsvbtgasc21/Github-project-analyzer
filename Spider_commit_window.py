@@ -1,3 +1,6 @@
+from collections import defaultdict
+from datetime import datetime
+
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow,QFileDialog,QMessageBox
 from PyQt5.QtGui import QIntValidator
 import sys
@@ -38,7 +41,7 @@ class Spider_commit_window(QMainWindow):
                 self.ui_spider.listWidget.addItem(f"Author Avatar: {commit['node']['author']['avatarUrl']}")
                 self.ui_spider.listWidget.addItem(f"Commit Date: {commit['node']['committedDate']}")
                 self.ui_spider.listWidget.addItem(f"Commit URL: {commit['node']['commitUrl']}")
-            self.ui_spider.count.setText(50)
+            # self.ui_spider.count.setText(50)
         except Exception as e:
             self.ui_spider.listWidget.addItem(f"显示结果时出错：{str(e)}")
         finally:
@@ -47,32 +50,55 @@ class Spider_commit_window(QMainWindow):
             self.ui_spider.stop.setEnabled(False)
 
     def analyze_author(self):
-        try:
-            # 尝试构建每个作者的提交计数字典
-            self.commit_counts_dir = {author: sum(1 for c in self.results if c['node']['author']['name'] == author)
-                                      for author in set([c['node']['author']['name'] for c in self.results])}
+        if self.ui_spider.comboBox.currentText()=="author":
+            try:
+                # 尝试构建每个作者的提交计数字典
+                self.commit_counts_dir = {author: sum(1 for c in self.results if c['node']['author']['name'] == author)
+                                          for author in set([c['node']['author']['name'] for c in self.results])}
 
-            # 过滤出提交数大于等于指定值的作者
-            self.ui_spider.count.text()  # 确保这里 self.ui_spider.count 是一个 QLineEdit 对象，并且有 text() 方法
-            self.commit_counts_dir_filtered = {author: count for author, count in self.commit_counts_dir.items() if
-                                               count >= int(self.ui_spider.count.text())}
+                # 过滤出提交数大于等于指定值的作者
+                self.ui_spider.count.text()  # 确保这里 self.ui_spider.count 是一个 QLineEdit 对象，并且有 text() 方法
+                self.commit_counts_dir_filtered = {author: count for author, count in self.commit_counts_dir.items() if
+                                                   count >= int(self.ui_spider.count.text())}
 
-            # 清除列表控件并添加过滤后的作者和提交数
-            self.ui_spider.listWidget.clear()
-            for author, count in self.commit_counts_dir_filtered.items():
-                self.ui_spider.listWidget.addItem(f"Author: {author}, Commit Count: {count}")
+                # 清除列表控件并添加过滤后的作者和提交数
+                self.ui_spider.listWidget.clear()
+                for author, count in self.commit_counts_dir_filtered.items():
+                    self.ui_spider.listWidget.addItem(f"Author: {author}, Commit Count: {count}")
 
-        except AttributeError as e:
-            print(f"属性错误：{str(e)}")
-        except ValueError as e:
-            print(f"值错误，可能是转换整数失败：{str(e)}")
-        except Exception as e:
-            print(f"分析作者时出现未知错误：{str(e)}")
+            except AttributeError as e:
+                print(f"属性错误：{str(e)}")
+            except ValueError as e:
+                print(f"值错误，可能是转换整数失败：{str(e)}")
+            except Exception as e:
+                print(f"分析作者时出现未知错误：{str(e)}")
+        else:
+            try:
+                commits_by_date = defaultdict(int)
+                # 遍历所有提交，按日期分组并计数
+                for commit in self.results:
+                    # 提取提交日期并转换为年月日格式
+                    commit_date = datetime.strptime(commit['node']['committedDate'], '%Y-%m-%dT%H:%M:%SZ').strftime(
+                        '%Y-%m-%d')
+                    # 对每个日期的提交进行计数
+                    commits_by_date[commit_date] += 1
+                threshold = int(self.ui_spider.count.text())
+                # 过滤出提交数大于等于指定值的日期
+                self.commit_counts_dir_filtered= {date: count for date, count in commits_by_date.items() if
+                                            count >= threshold}
+                # 清除列表控件并添加过滤后的日期和提交数
+                self.ui_spider.listWidget.clear()
+                for date, count in sorted(self.commit_counts_dir_filtered.items()):
+                    self.ui_spider.listWidget.addItem(f"Date: {date}, Commit Count: {count}")
+            except AttributeError as e:
+                print(f"属性错误：{str(e)}")
+            except ValueError as e:
+                print(f"值错误，可能是转换整数失败：{str(e)}")
+            except Exception as e:
+                print(f"分析日期时出现未知错误：{str(e)}")
     def generate_author(self):
         plt.bar(self.commit_counts_dir_filtered.keys(), self.commit_counts_dir_filtered.values())
-        plt.xlabel('Author')
         plt.ylabel('Commit Count')
-        plt.title('Commits by Author (>100 commits)')
         plt.show()
     def show_results(self):
         try:
