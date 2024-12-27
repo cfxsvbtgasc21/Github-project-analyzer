@@ -43,41 +43,34 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
          <property name="spacing">
-          <number>90</number>
+          <number>40</number>
          </property>
          <item>
           <widget class="QLabel" name="label_2">
            <property name="text">
-            <string>Github项目主页网址</string>
+            <string>用户名称</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="address"/>
+          <widget class="QLineEdit" name="username"/>
          </item>
         </layout>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <property name="spacing">
-          <number>20</number>
+          <number>30</number>
          </property>
          <item>
           <widget class="QLabel" name="label_3">
            <property name="text">
-            <string>存储结果地址</string>
+            <string>token设置</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="save_address"/>
-         </item>
-         <item>
-          <widget class="QPushButton" name="browse">
-           <property name="text">
-            <string>浏览</string>
-           </property>
-          </widget>
+          <widget class="QLineEdit" name="token"/>
          </item>
         </layout>
        </item>
@@ -89,12 +82,12 @@
          <item>
           <widget class="QLabel" name="label_6">
            <property name="text">
-            <string>Cookie设置</string>
+            <string>仓库名称</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="Cookie"/>
+          <widget class="QLineEdit" name="repo"/>
          </item>
         </layout>
        </item>
@@ -233,23 +226,16 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_6">
          <item>
-          <widget class="QPushButton" name="pushButton_2">
+          <widget class="QPushButton" name="generate_cloud">
            <property name="text">
             <string>生成词云</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton">
+          <widget class="QPushButton" name="generate">
            <property name="text">
             <string>生成分析图</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_3">
-           <property name="text">
-            <string>统计</string>
            </property>
           </widget>
          </item>
