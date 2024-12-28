@@ -262,25 +262,18 @@
      <height>30</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menu">
-    <property name="title">
-     <string>文件</string>
-    </property>
-    <addaction name="actions"/>
-   </widget>
    <widget class="QMenu" name="menu_2">
     <property name="title">
      <string>帮助</string>
     </property>
     <addaction name="introduction"/>
    </widget>
-   <addaction name="menu"/>
    <addaction name="menu_2"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="introduction">
    <property name="text">
-    <string>说明</string>
+    <string>token获取说明</string>
    </property>
   </action>
   <action name="actions">
