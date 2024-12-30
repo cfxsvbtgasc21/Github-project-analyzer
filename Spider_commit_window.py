@@ -15,6 +15,7 @@ class Spider_commit_window(QMainWindow):
         self.ui_spider.setupUi(self)
         self.ui_spider.progressBar.setValue(0)
         self.ui_spider.stop.setEnabled(False)
+
         # self.ui_spider.generate.setEnabled(False)
         max_value = 2000
         # 创建 QIntValidator，限制输入为大于0的整数且小于max_value
@@ -27,6 +28,8 @@ class Spider_commit_window(QMainWindow):
         self.ui_spider.start.clicked.connect(self.show_results)
         self.ui_spider.stop.clicked.connect(self.stop_spi)
         self.ui_spider.actiontoken.triggered.connect(self.show_spider_help)
+        self.ui_spider.generate.setEnabled(False)
+        self.ui_spider.summary.setEnabled(False)
         self.results=None
     def handle_results(self, all_commits):
         # 处理结果
@@ -41,14 +44,13 @@ class Spider_commit_window(QMainWindow):
                 self.ui_spider.listWidget.addItem(f"Author Avatar: {commit['node']['author']['avatarUrl']}")
                 self.ui_spider.listWidget.addItem(f"Commit Date: {commit['node']['committedDate']}")
                 self.ui_spider.listWidget.addItem(f"Commit URL: {commit['node']['commitUrl']}")
-            # self.ui_spider.count.setText(50)
+            self.ui_spider.summary.setEnabled(True)
         except Exception as e:
             self.ui_spider.listWidget.addItem(f"显示结果时出错：{str(e)}")
         finally:
             # 重新启用开始按钮
             self.ui_spider.start.setEnabled(True)
             self.ui_spider.stop.setEnabled(False)
-
     def analyze_author(self):
         if self.ui_spider.comboBox.currentText()=="author":
             try:
@@ -65,13 +67,13 @@ class Spider_commit_window(QMainWindow):
                 self.ui_spider.listWidget.clear()
                 for author, count in self.commit_counts_dir_filtered.items():
                     self.ui_spider.listWidget.addItem(f"Author: {author}, Commit Count: {count}")
-
+                self.ui_spider.generate.setEnabled(True)
             except AttributeError as e:
-                print(f"属性错误：{str(e)}")
+                QMessageBox.critical(None, "Attribute Error", f"属性错误：{str(e)}")
             except ValueError as e:
-                print(f"值错误，可能是转换整数失败：{str(e)}")
+                QMessageBox.critical(None, "Value Error", f"值错误，可能是转换整数失败：{str(e)}")
             except Exception as e:
-                print(f"分析作者时出现未知错误：{str(e)}")
+                QMessageBox.critical(None, "Unknown Error", f"分析作者时出现未知错误：{str(e)}")
         else:
             try:
                 commits_by_date = defaultdict(int)
@@ -90,16 +92,21 @@ class Spider_commit_window(QMainWindow):
                 self.ui_spider.listWidget.clear()
                 for date, count in sorted(self.commit_counts_dir_filtered.items()):
                     self.ui_spider.listWidget.addItem(f"Date: {date}, Commit Count: {count}")
+                self.ui_spider.generate.setEnabled(True)
             except AttributeError as e:
-                print(f"属性错误：{str(e)}")
+                QMessageBox.critical(None, "Attribute Error", f"属性错误：{str(e)}")
             except ValueError as e:
-                print(f"值错误，可能是转换整数失败：{str(e)}")
+                QMessageBox.critical(None, "Value Error", f"值错误，可能是转换整数失败：{str(e)}")
             except Exception as e:
-                print(f"分析日期时出现未知错误：{str(e)}")
+                QMessageBox.critical(None, "Unknown Error", f"分析日期时出现未知错误：{str(e)}")
     def generate_author(self):
-        plt.bar(self.commit_counts_dir_filtered.keys(), self.commit_counts_dir_filtered.values())
-        plt.ylabel('Commit Count')
-        plt.show()
+        try:
+            plt.bar(self.commit_counts_dir_filtered.keys(), self.commit_counts_dir_filtered.values())
+            plt.ylabel('Commit Count')
+            plt.show()
+        except Exception as e:
+            # 弹出错误窗口
+            QMessageBox.critical(None, "Error", f"An error occurred: {str(e)}")
     def show_results(self):
         try:
             self.ui_spider.count.clear()
@@ -107,12 +114,12 @@ class Spider_commit_window(QMainWindow):
             self.ui_spider.progressBar.setValue(0)
             self.spider_thread = SP.SpiderThread(self.ui_spider.username.text(), self.ui_spider.repo.text(), self.ui_spider.token.text())
             # self.spider_thread.is_running=True
-            self.ui_spider.stop.setEnabled(True)
             self.spider_thread.result_ready.connect(self.handle_results)
             # 禁用开始按钮
             self.ui_spider.start.setEnabled(False)
             self.ui_spider.stop.setEnabled(True)
             self.spider_thread.progress_updated.connect(self.update_progress)
+            self.spider_thread.error_occurred.connect(self.show_error_message)
             self.spider_thread.start()
             # 禁用开始按钮
         except Exception as e:
@@ -125,11 +132,19 @@ class Spider_commit_window(QMainWindow):
             self.ui_spider.progressBar.setValue(value)
         except Exception as e:
             print(f"更新进度条时出错：{str(e)}")
+
     def show_spider_help(self):
         self.message_help = QMessageBox()
         self.message_help.setWindowTitle("帮助")
-        self.message_help.setText("这是个爬虫工具")
+        self.message_help.setText(
+            "创建个人访问令牌（Personal Access Token, PAT）：\n登录你的GitHub账户。访问设置页面，\n找到“Developer settings”部分。\n在“Personal access tokens”中，点击“Generate new token”。\n给令牌命名，并选择你希望授权的权限范围（scopes）。对于基本的仓库访问，你可能需要勾选repo。\n生成令牌后，请确保复制并保存该令牌，因为它不会再次显示。")
         self.message_help.show()
+
+    def show_error_message(self, message):
+        QMessageBox.critical(self, "错误", message)
+        self.results = None
+        self.ui_spider.start.setEnabled(True)
+        self.ui_spider.stop.setEnabled(False)
     def return_to_home(self):
         # 如果爬虫线程正在运行，先停止它
         if hasattr(self, 'spider_thread') and self.spider_thread.isRunning():
@@ -151,6 +166,8 @@ class Spider_commit_window(QMainWindow):
                 # 重新启用开始按钮
                 self.ui_spider.start.setEnabled(True)
                 self.ui_spider.stop.setEnabled(False)
+                self.ui_spider.generate.setEnabled(False)
+                self.ui_spider.summary.setEnabled(False)
                 # 在列表中显示取消信息
                 self.ui_spider.listWidget.clear()
                 self.ui_spider.listWidget.addItem("爬取已取消")
