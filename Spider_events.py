@@ -134,6 +134,8 @@ class SpiderThread(QThread):
 class SpiderThread2(QThread):
     progress_updated = pyqtSignal(int)
     result_ready = pyqtSignal(list)
+    error_occurred = pyqtSignal(str)  # 添加错误信号
+
     def __init__(self, owner, repo, token):
         super().__init__()
         self.is_running = True
@@ -141,116 +143,139 @@ class SpiderThread2(QThread):
         self.repo = repo
         self.token = token
     def run(self):
-        graphql_url = "https://api.github.com/graphql"
-        # 设置请求头
-        headers = {
-            "Authorization": f"Bearer {self.token}",
-            "Content-Type": "application/json"
-        }
-        query = """
-                 query ($owner: String!, $repo: String!) {
-                   repository(owner: $owner, name: $repo) {
-                     issues(states: CLOSED) {
-                       totalCount
+        try:
+            graphql_url = "https://api.github.com/graphql"
+            headers = {
+                "Authorization": f"Bearer {self.token}",
+                "Content-Type": "application/json"
+            }
+            query = """
+                     query ($owner: String!, $repo: String!) {
+                       repository(owner: $owner, name: $repo) {
+                         issues(states: CLOSED) {
+                           totalCount
+                         }
+                       }
                      }
-                   }
-                 }
-                 """
+                     """
 
-        variables = {
-            "owner": self.owner,
-            "repo": self.repo
-        }
+            variables = {
+                "owner": self.owner,
+                "repo": self.repo
+            }
 
-        response = requests.post(graphql_url, json={'query': query, 'variables': variables}, headers=headers,
-                                 verify=False)
+            # 验证token
+            try:
+                response = requests.post(graphql_url, json={'query': query, 'variables': variables}, 
+                                      headers=headers, verify=False, timeout=10)  # 添加超时设置
 
-        if response.status_code != 200:
-            print(f"Error fetching data: {response.status_code}")
-            print("Response text:", response.text)
-            return None
+                if response.status_code == 401:
+                    self.error_occurred.emit("Token验证失败，请检查您的访问令牌是否正确")
+                    return
+                    
+                if response.status_code != 200:
+                    self.error_occurred.emit(f"请求失败: {response.status_code}\n{response.text}")
+                    return
+                data = response.json()
+                if 'data' not in data or not data['data']:
+                    self.error_occurred.emit(
+                        f"未找到仓库数据，请检查仓库名称({self.repo})和所有者({self.owner})是否正确")
+                    return
+            except requests.exceptions.Timeout:
+                self.error_occurred.emit("请求超时，请检查网络连接")
+                return
+            except requests.exceptions.ConnectionError:
+                self.error_occurred.emit("网络连接错误，请检查网络状态")
+                return
 
-        data = response.json()
-        if 'data' not in data or not data['data']:
-            print("No data found in the response.")
-            print("Response JSON:", json.dumps(data, indent=2))
-            return None
 
-        issues_count = data.get("data", {}).get("repository", {}).get("issues", {}).get("totalCount", 0)
-        # GraphQL 查询语句：获取仓库中的已关闭的 Issues
-        query = """
-                query ($owner: String!, $repo: String!, $first: Int!, $after: String) {
-                  repository(owner: $owner, name: $repo) {
-                    issues(first: $first, after: $after, states: CLOSED) {
-                      nodes {
-                        title
-                        number
-                        createdAt
-                        closedAt
-                        body
-                        labels(first: 10) {
+
+            issues_count = data.get("data", {}).get("repository", {}).get("issues", {}).get("totalCount", 0)
+            # GraphQL 查询语句：获取仓库中的已关闭的 Issues
+            query = """
+                    query ($owner: String!, $repo: String!, $first: Int!, $after: String) {
+                      repository(owner: $owner, name: $repo) {
+                        issues(first: $first, after: $after, states: CLOSED) {
                           nodes {
-                            name
+                            title
+                            number
+                            createdAt
+                            closedAt
+                            body
+                            labels(first: 10) {
+                              nodes {
+                                name
+                              }
+                            }
+                          }
+                          pageInfo {
+                            hasNextPage
+                            endCursor
                           }
                         }
                       }
-                      pageInfo {
-                        hasNextPage
-                        endCursor
-                      }
                     }
-                  }
+                    """
+
+            issues = []
+            after_cursor = None
+
+            while self.is_running==True:
+                # GraphQL 查询变量
+                variables = {
+                    "owner": self.owner,
+                    "repo": self.repo,
+                    "first": 100,
+                    "after": after_cursor
                 }
-                """
 
-        issues = []
-        after_cursor = None
+                try:
+                    response = requests.post(graphql_url, json={'query': query, 'variables': variables}, 
+                                          headers=headers, verify=False, timeout=10)
+                    
+                    if response.status_code != 200:
+                        self.error_occurred.emit(f"获取数据失败: {response.status_code}\n{response.text}")
+                        break
+                        
+                    data = response.json()
+                    if 'data' not in data or not data['data']:
+                        print("No data found in the response.")
+                        print("Response JSON:", json.dumps(data, indent=2))  # 打印返回的完整 JSON 数据
+                        break
 
-        while self.is_running==True:
-            # GraphQL 查询变量
-            variables = {
-                "owner": self.owner,
-                "repo": self.repo,
-                "first": 100,
-                "after": after_cursor
-            }
+                    # 获取当前页的issues
+                    issues_data = data.get("data", {}).get("repository", {}).get("issues", {}).get("nodes", [])
 
-            response = requests.post(graphql_url, json={'query': query, 'variables': variables}, headers=headers,
-                                     verify=False)
+                    if not issues_data:
+                        print("No issues found.")
+                        break
 
-            if response.status_code != 200:
-                print(f"Error fetching data: {response.status_code}")
-                print("Response text:", response.text)  # 打印错误响应的内容
-                break
-            data = response.json()
-            if 'data' not in data or not data['data']:
-                print("No data found in the response.")
-                print("Response JSON:", json.dumps(data, indent=2))  # 打印返回的完整 JSON 数据
-                break
+                    # 将当前页的 issues 添加到 issues 列表
+                    issues.extend(issues_data)
 
-            # 获取当前页的issues
-            issues_data = data.get("data", {}).get("repository", {}).get("issues", {}).get("nodes", [])
+                    # 获取分页信息
+                    page_info = data.get("data", {}).get("repository", {}).get("issues", {}).get("pageInfo", {})
+                    has_next_page = page_info.get("hasNextPage", False)
+                    after_cursor = page_info.get("endCursor", None)
 
-            if not issues_data:
-                print("No issues found.")
-                break
+                    # 如果没有下一页，退出循环
+                    if not has_next_page:
+                        self.progress_updated.emit(100)
+                        break
+                    else :
+                        self.progress_updated.emit(int((len(issues) + 100) /issues_count * 100))  # 发送进度更新信号
 
-            # 将当前页的 issues 添加到 issues 列表
-            issues.extend(issues_data)
+                except requests.exceptions.Timeout:
+                    self.error_occurred.emit("请求超时，请检查网络连接")
+                    break
+                except requests.exceptions.ConnectionError:
+                    self.error_occurred.emit("网络连接错误，请检查网络状态")
+                    break
 
-            # 获取分页信息
-            page_info = data.get("data", {}).get("repository", {}).get("issues", {}).get("pageInfo", {})
-            has_next_page = page_info.get("hasNextPage", False)
-            after_cursor = page_info.get("endCursor", None)
-
-            # 如果没有下一页，退出循环
-            if not has_next_page:
-                self.progress_updated.emit(100)
-                break
-            else :
-                self.progress_updated.emit(int((len(issues) + 100) /issues_count * 100))  # 发送进度更新信号
-
-        self.result_ready.emit(issues)
+            self.result_ready.emit(issues)
+        except Exception as e:
+            self.error_occurred.emit(f"发生未知错误: {str(e)}")
     # 分页请求的函数
+
 
 

@@ -28,7 +28,7 @@ class MainApp(QWidget):
     def show_helps(self):
         self.message_help = QMessageBox()
         self.message_help.setWindowTitle("帮助")
-        self.message_help.setText("这是个Github项目的分析器，里面包括对象的issues分析和commmits分析。issues分析可以得到主要问题的信息和解决时间对比。\ncommmits分析是对该项目提交记录基于作者和日期的分析。")
+        self.message_help.setText("这是个Github项目的分析器，里面包括对象的issues分析和commmits分析。issues分析可以得到主要问题的信息和解决时间对比。\ncommmits分析是对该项目提交记录基于作者和日期的分析。\n建议使用加速器防止出现网络问题导致访问数据失败！")
         self.message_help.show()
     def quit(self):
         exit(0)

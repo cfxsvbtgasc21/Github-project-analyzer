@@ -22,15 +22,25 @@ class Spider_issue_window(QMainWindow):
         self.ui_spider.introduction.triggered.connect(self.show_spider_help)
         self.ui_spider.generate_cloud.clicked.connect(self.generate_wordcloud)
         self.ui_spider.generate.clicked.connect(self.generate_pie_chart)
+        self.ui_spider.generate.setEnabled(False)
+        self.ui_spider.generate_cloud.setEnabled(False)
+
+    def show_error_message(self, message):
+        QMessageBox.critical(self, "错误", message)
         self.results=None
+        self.ui_spider.start.setEnabled(True)
+        self.ui_spider.stop.setEnabled(False)
 
     def show_results(self):
         try:
             self.ui_spider.progressBar.setValue(0)
+            self.ui_spider.generate.setEnabled(False)
+            self.ui_spider.generate_cloud.setEnabled(False)
             self.ui_spider.listWidget.clear()
             # 创建并启动爬虫线程
             self.spider_thread = SP.SpiderThread2(self.ui_spider.username.text(), self.ui_spider.repo.text(),self.ui_spider.token.text())
             self.ui_spider.stop.setEnabled(True)
+            self.spider_thread.error_occurred.connect(self.show_error_message)
             self.spider_thread.progress_updated.connect(self.update_progress)
             self.spider_thread.result_ready.connect(self.handle_results)
             # 禁用开始按钮
@@ -124,7 +134,8 @@ class Spider_issue_window(QMainWindow):
             # 重新启用开始按钮
             self.ui_spider.start.setEnabled(True)
             self.ui_spider.stop.setEnabled(False)
-
+            self.ui_spider.generate_cloud.setEnabled(True)
+            self.ui_spider.generate.setEnabled(True)
     def update_progress(self, value):
         try:
             self.ui_spider.progressBar.setValue(value)
@@ -133,7 +144,7 @@ class Spider_issue_window(QMainWindow):
     def show_spider_help(self):
         self.message_help = QMessageBox()
         self.message_help.setWindowTitle("帮助")
-        self.message_help.setText("这是个爬虫工具")
+        self.message_help.setText("创建个人访问令牌（Personal Access Token, PAT）：\n登录你的GitHub账户。访问设置页面，\n找到“Developer settings”部分。\n在“Personal access tokens”中，点击“Generate new token”。\n给令牌命名，并选择你希望授权的权限范围（scopes）。对于基本的仓库访问，你可能需要勾选repo。\n生成令牌后，请确保复制并保存该令牌，因为它不会再次显示。")
         self.message_help.show()
     def return_to_home(self):
         # 如果爬虫线程正在运行，先停止它
