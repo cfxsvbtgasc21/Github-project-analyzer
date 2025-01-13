@@ -167,6 +167,7 @@ class SpiderThread2(QThread):
         self.owner = owner
         self.repo = repo
         self.token = token
+        self.flag = True
     def run(self):
         try:
             graphql_url = "https://api.github.com/graphql"
@@ -271,6 +272,8 @@ class SpiderThread2(QThread):
 
                     if not issues_data:
                         print("No issues found.")
+                        self.error_occurred.emit("issue信息为空")
+                        self.flag=False
                         break
 
                     # 将当前页的 issues 添加到 issues 列表
@@ -294,8 +297,8 @@ class SpiderThread2(QThread):
                 except requests.exceptions.ConnectionError:
                     self.error_occurred.emit("网络连接错误，请检查网络状态")
                     break
-
-            self.result_ready.emit(issues)
+            if(self.flag):
+                self.result_ready.emit(issues)
         except Exception as e:
             self.error_occurred.emit(f"发生未知错误: {str(e)}")
     # 分页请求的函数

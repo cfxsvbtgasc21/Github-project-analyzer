@@ -61,13 +61,16 @@ class Spider_issue_window(QMainWindow):
                     else:
                         label_counts[label_name] = 1
             return label_counts
-        wordcloud = WordCloud(width=800, height=400, background_color='white').generate_from_frequencies(extract_labels(self.results))
-        # 显示词云图
-        plt.figure(figsize=(10, 5))
-        plt.imshow(wordcloud, interpolation='bilinear')
-        plt.title("The word cloud generated for issues based on labels")
-        plt.axis('off')
-        plt.show()
+        try:
+            wordcloud = WordCloud(width=800, height=400, background_color='white').generate_from_frequencies(extract_labels(self.results))
+            # 显示词云图
+            plt.figure(figsize=(10, 5))
+            plt.imshow(wordcloud, interpolation='bilinear')
+            plt.title("The word cloud generated for issues based on labels")
+            plt.axis('off')
+            plt.show()
+        except Exception as e:
+            QMessageBox.critical(self, "错误", "词云提取出错，未找到相关标签")
         # plt.savefig('pie_chart.png', format='png')
 
     def generate_pie_chart(self):
@@ -172,7 +175,7 @@ class Spider_issue_window(QMainWindow):
                 self.ui_spider.listWidget.addItem("爬取已取消")
         except Exception as e:
             print(f"停止爬虫时出错：{str(e)}")
-
+            
     def open_file_dialog(self):
         directory = QFileDialog.getExistingDirectory(
             self,  # 使用spider_window作为父窗口
